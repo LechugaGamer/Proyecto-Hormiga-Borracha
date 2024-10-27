@@ -43,7 +43,7 @@ p: poison
 g: glucose
 s: start
 e: exit
-a: ant
+a: alcohol
 "":empty
 
 """
@@ -58,10 +58,19 @@ Alelos = {"arriba":  [-1,0],
           "derecha": [0,1],
           "izquierda": [1,0],
           "comer": "comer"}
+alelos_keys = list(Alelos.keys())
+
+Puntos_general = {"e": 100,
+          " " : 10,
+          "a" : -20,
+          "s" : 30,
+          "p" : "muerte" #la mata, la elimina directamente, se cruzan las dos mejores
+}
 
 
 def algoritmo_principal(matriz):
     pass
+
 #para saber numéricamente la posición de la hormiga
 
 def encontrar_pos(matriz, elemento):
@@ -73,11 +82,42 @@ def encontrar_pos(matriz, elemento):
             
 start = encontrar_pos(laberinto, "s")
 exit = encontrar_pos(laberinto, "e")
+def action(al):
+    return Alelos[al]
+
+def adn_i (): 
+    return [random.choice(alelos_keys)] #retorna una lista con un alelo incial
+
+def mutacion(adn):
+    for alelo in adn:
+        muta = random.randint(0,10)
+
+        if muta == 10:
+            print("La hormiga ha mutado")
+            alelo = random.choice(alelos_keys)
+    
+    for alelo in range(adn):
+        muta = random.randint(0,20)
+
+        if muta == 20:
+            print("La hormiga ha mutado")
+            adn.append(random.choice(alelos_keys))
+
+
+
 
 """
-Como parámetro para el fitness, voy a utilizar la distancia del taxista,
+Para uno de los parámetros del fitness, voy a utilizar la distancia del taxista:
 es el valor absoluto de la suma de la diferencia de las coordenadas entre dos puntos.
 En este caso, la hormiga y la salida.
-Si la distancia es cero, ese es el mejor caso.
+Si la distancia es cero, ese es el mejor caso para este parámetro.
 
+Otro va a ser la cantidad de puntos de azucar, entre más mejor.
+
+Otro va a ser la cantidad de puntos de alcohol, entre menos mejor.
+
+Y si come veneno directamente se muere XD.
 """
+
+
+print(adn_i())
