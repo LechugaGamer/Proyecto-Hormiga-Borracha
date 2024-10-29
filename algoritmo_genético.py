@@ -75,8 +75,10 @@ Puntos_general = {"e": 100,
 }
 
 
-def algoritmo_principal(matriz):
-    pass
+def algoritmo_principal(matriz, hormiga):
+    h_i_1 = crear_hormiga()
+    h_i_2 = crear_hormiga()
+    
 
 #para saber numéricamente la posición de la hormiga
 
@@ -90,11 +92,19 @@ def encontrar_pos(matriz, elemento):
 start = encontrar_pos(laberinto, "s")
 exit = encontrar_pos(laberinto, "e")
 
-def action(al):
-    return Alelos[al]
-
 def adn_i ():  
     return [random.choice(alelos_keys)] #retorna una lista con un alelo incial
+    #básicamente, genera a la hormiga, pero no es la hormiga
+    #porque esta tiene puntos y esas cosas
+
+def crear_hormiga(): #método del objeto, pero hay que hacer el objeto a parte
+    
+    adn = adn_i()
+    with open("puntajes-hormiga.txt", "w") as text:
+        num = 0
+        for line in text:
+            num+=1
+        text.write(f"{num+1} _ ADN:{adn} _ AZUCAR:0 _ ALCOHOL:0 _DISTANCIA:0_PUNTUACION:0")
 
 def mutacion(adn):
 
@@ -111,6 +121,8 @@ def mutacion(adn):
         if muta == 20:
             print("La hormiga ha mutado")
             adn.append(random.choice(alelos_keys))
+    
+    return adn #retorna la lista con alguna mutación o sin ella
 
 
 
@@ -132,8 +144,19 @@ def comer(dirección, matriz, x, y):
     if dirección == "comer arriba":
         pass
 
-
-
+def accion_objetos(matriz, x, y):
+    if matriz[y][x] == "p":
+        print("La hormiga ha ingerido veneno y ha muerto")
+        #habrá un método que la mate
+    
+    elif matriz[y][x] == "s":
+        print(f"La hormiga ha ingerido azucar, gana {Puntos_general["s"]} puntos")
+###
+###
+##
+###
+###
+##
 
     
 
@@ -159,7 +182,7 @@ def fitness(matriz, adn):
         if ( 0 <= Alelos[alelo][0] + x_actual < len(matriz[0]) and 0 <= Alelos[alelo][1] + y_actual < len(matriz) 
             ):
 
-            if Alelos[alelo] != "comer":
+            if Alelos[alelo] != "comer" and matriz[Alelos[alelo][1] + y_actual][Alelos[alelo][0] + x_actual] != "r":
 
            
                 x_actual += Alelos[alelo][0]
@@ -167,4 +190,5 @@ def fitness(matriz, adn):
 
             if Alelos[alelo] == "comer":
 
-                objeto = comer(alelo, matriz, x_actual, y_actual)
+                comer(alelo, matriz, x_actual, y_actual)
+
