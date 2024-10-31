@@ -22,3 +22,4 @@ adn2 = ["derecha", "comer"]
 
 resultado = cruce(adn1, adn2)
 print(resultado)
+
