@@ -1,0 +1,3 @@
+HORMIGA:1_SALUD:100_ALCOHOL:0_PUNTOS:85_ADN:['comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'derecha', 'comer', 'abajo', 'abajo', 'izquierda', 'derecha', 'derecha']_
+HORMIGA:2_SALUD:100_ALCOHOL:0_PUNTOS:85_ADN:['comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'derecha', 'abajo', 'comer', 'derecha', 'abajo', 'derecha']_
+HORMIGA:3_SALUD:100_ALCOHOL:0_PUNTOS:80_ADN:['comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'comer', 'derecha', 'abajo', 'abajo', 'abajo', 'izquierda', 'derecha', 'derecha']_
