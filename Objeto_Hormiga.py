@@ -9,6 +9,7 @@ Alelos = {"arriba":  [0,-1],
 
 
 alelos_keys = list(Alelos.keys()) #para llamar a los alelos
+alelos_keys_sin_comer = ["arriba", "abajo", "derecha", "izquierda"]
 
 
 #For debbug:
@@ -66,11 +67,11 @@ def encontrar_pos(matriz, elemento):
                 return [columna, fila] #posición del elemento en la fila, es basicamente para el inicio  [x,y]
             
 start = encontrar_pos(laberinto, "s")
-print(start)
 exit = encontrar_pos(laberinto, "e")
 
 adn_i_1 = [random.choice(alelos_keys)]
 adn_i_2 = [random.choice(alelos_keys)]
+
 
 class Hormiga:
     def __init__(self, posicion, salud, alcohol_lvl, puntos, adn):
@@ -89,11 +90,18 @@ class Hormiga:
     def add_pts(self, puntos):
 
         self.puntos += puntos
+    def change_adn(self, pos, valor):
+
+        print(f"Sin cambio {self.adn}")
+        self.adn[pos] = valor
+        print("cambia adn")
+        print(f"Sí cambió {self.adn}")
+
 
     def mover(self, alelo):
 
 
-        if ( 0 <= Alelos[alelo][0] + self.posicion[0] < len(laberinto[0]) and 0 <= Alelos[alelo][1] + self.posicion[1] < len(laberinto) 
+        if (0 <= Alelos[alelo][0] + self.posicion[0] < len(laberinto[0]) and 0 <= Alelos[alelo][1] + self.posicion[1] < len(laberinto) 
                 ):
 
             if  laberinto[Alelos[alelo][1] + self.posicion[1]][Alelos[alelo][0] + self.posicion[0]] != "r":
@@ -109,14 +117,16 @@ class Hormiga:
                     print("La hormiga a ignorado al alcohol")
                 #para decir que no comió y avanzó
 
-                self.posicion[1] += Alelos[alelo][1]
-                self.posicion[0] += Alelos[alelo][0] #aquí cambiamos el self para actualizar la posición de la hormiga hasta su final
+                self.posicion[1] = self.posicion[1] + Alelos[alelo][1]
+                self.posicion[0] = self.posicion[0] + Alelos[alelo][0] #aquí cambiamos el self para actualizar la posición de la hormiga hasta su final
             else:
-                print("Topó con roca -10 pts")
-                self.puntos -= 10
+                print("Topó con roca (-20 pts)")
+                self.puntos -= 20
+                
         else:
-            print("Intentó salir de la frontera")
-            self.puntos -= 10
+            print("Intentó salir de la frontera (-20 pts)")
+            self.puntos -= 20
+            
 
     def comer(self):
         
@@ -132,9 +142,10 @@ class Hormiga:
             #interactua con alcohol
             pass
         else:
-            print("La hormiga trató de comer donde no había nada (-5pts)")
-            self.puntos -= 5
-
+            print("La hormiga intentó comer donde no había comida (-30 pts)")
+            self.puntos -= 30
+            
+        
     def modifica_salud(self):
         casilla = laberinto[self.posicion[1]][self.posicion[0]]
 
@@ -151,26 +162,22 @@ class Hormiga:
     def muta(self): 
 
         for i in range(len(self.adn)):
-            muta = random.randint(0,10)
 
-            if muta == 10:
-                print("La hormiga ha mutado")
-                self.adn[i] = random.choice(alelos_keys)
+            muta = random.randint(0,1)
+
+            if muta == 1:
+                new_adn = random.choice(alelos_keys)
+                print(f"La hormiga ha mutado y cambió {self.adn[i]} por {new_adn}")
+                self.adn[i] = new_adn
         
         for alelo in range(len(self.adn)):
             muta = random.randint(0,20)
 
             if muta == 20:
-                print("La hormiga ha mutado")
+                print("La hormiga ha mutado y obtuvo un alelo")
                 self.adn.append(random.choice(alelos_keys))
     
-    
-
-
 Poblacion = [Hormiga(start, 100, 0, 0, adn_i_1), Hormiga(start, 100, 0, 0, adn_i_2)]
-
-New_poblacion = []
-
 
 def cruce(adn1, adn2):
 
@@ -180,61 +187,91 @@ def cruce(adn1, adn2):
     adn_hijo = []
     
     for i in range(max(len(adn1), len(adn2))):
-        
-        if random.choice([True, False]): #si es True ejecuta
+        mutacion = random.randint(0,3)
+        if mutacion == 1: #si es 1 toma el alelo de padre 1
             if i < len(adn1):
                 adn_hijo.append(adn1[i])
 
-                if random.choice([True, False]):
+                if random.choice([True, False]): #si es true también toma el alelo de padre 2
                     if i < len(adn2):
                         adn_hijo.append(adn2[i])
 
-        else: #sino no
+        elif mutacion==2: #si es dos toma el alelo de padre 2
             if i < len(adn2):
                 adn_hijo.append(adn2[i])
 
-                if random.choice([True, False]):
+                if random.choice([True, False]): #si es True también toma el alelo de padre 1
                     if i < len(adn1):
                         adn_hijo.append(adn1[i])
+        
+        #si es 3, nada pasa, o sea no toma ningún alelo
 
 
     
     
 
-    
+    print(type(adn_hijo))
     hormiga_hija = Hormiga(start, 100, 0, 0, adn_hijo)
     return hormiga_hija
-                   
+
+def encuentre_datos(linea, etiqueta):
+    
+    inicio = linea.find(etiqueta)
+    inicio += len(etiqueta) 
+
+    final = linea.find("_", inicio)
+
+    if etiqueta == "ADN:": #Esto porque ADN siempre es una lista y para efectos de este código ponerlo aparte es muy útil
+        dato = linea[inicio:final].strip()  # Eliminar espacios en blanco
+
+        if dato.startswith("[") and dato.endswith("]"): # Si el dato está en formato de lista, convertirlo en una lista
+            
+            dato = dato[1:-1].replace("'", "").strip()
+            return [d.strip() for d in dato.split(",")]  # Devolver una lista de alelos
+        else:
+            return [dato]  # Retornar como lista de un solo elemento
+    
+
+    return linea[inicio:final]  #si no es ADN, retorna string, pues lo que se escribe es str            
 
 def run():
     global Poblacion
 
-    with open("puntajes-hormiga.txt", "w") as text:
+    with open("puntajes-hormiga.txt", "w") as text: #borra todo para comenzar
         pass
 
+    gen = 1
     
     while True:
         
+        lista_adn_temp =[]
         
-
-        for hormiga in Poblacion: #cambia los atributos del objeto
+        for hormiga in Poblacion:
+            
             adn = hormiga.get_info()[4]
 
             for alelo in adn:
                 if alelo != "comer":
-
+                    
                     pre_fitness = hormiga.fitness()
 
-                    hormiga.mover(alelo)
+                    hormiga.mover(alelo) #cambia los atributos del objeto
 
                     post_fitness = hormiga.fitness()
 
-                    if pre_fitness < post_fitness:
-                        print("La hormiga ha hecho un movimiento menos óptimo")
-                        hormiga.add_pts(-10)
-                    
+                    if post_fitness < pre_fitness:
+                        print("La hormiga hizo un movimiento óptimo (+20 pts)")
+                        hormiga.add_pts(20)
+                    else:
+                        print("La hormiga hizo un movimiento NO óptimo (-30 pts)")
+                        hormiga.add_pts(-30)
                 else:
+
                     hormiga.comer()
+
+                    
+                        
+                       
             
             fitness = hormiga.fitness()
 
@@ -242,16 +279,14 @@ def run():
 
             if fitness == 0:
                 hormiga.add_pts(100)
-                print("\n")
                 print("la hormiga ha llegado a la meta")
-                print("\n")
-            
+                
             else:
-                print("\n")
                 hormiga.add_pts(-5*fitness)
                 print(f"la hormiga quedó a una distancia relativa de {fitness} ({-5*fitness}pts)")
-                print("\n")
                 
+            print("Hormiga resultados:", hormiga.get_info())
+
         for hormiga in Poblacion: #para meterlas despues de modificarlas (evalua su puntaje)
 
             with open("puntajes-hormiga.txt", "r") as text:
@@ -339,42 +374,25 @@ def run():
                     
         hormiga_hija = cruce(adnh1, adnh2)
 
-        print(hormiga_hija.get_info())
-        
-
         hormiga_hija.muta()
 
+        print("Hormiga Hija:", hormiga_hija.get_info())
 
         Poblacion = [hormiga_hija] #esta lista se modifica para que tenga sentido en el código, pues evalua las hormigas in Poblacion
+        
+        gen+=1
 
         with open("puntajes-hormiga.txt", "r") as text:
             lines = text.readlines()
-            if int(encuentre_datos(lines[0], "PUNTOS:")) >= 100:
+            if int(encuentre_datos(lines[0], "PUNTOS:")) >= 180:
                 break
         #option = input("<s> para salir, <any oter key> para la siguiente simulación")
         #esto for debbug, pero ya después lo quitamos
         #if option == "s":
             #break
+    print(f"Numero de generaciones: {gen}")
         
 
-def encuentre_datos(linea, etiqueta):
-    
-    inicio = linea.find(etiqueta)
-    inicio += len(etiqueta) 
 
-    final = linea.find("_", inicio)
-
-    if etiqueta == "ADN:":
-        dato = linea[inicio:final].strip()  # Eliminar espacios en blanco
-
-        # Si el dato está en formato de lista (por ejemplo, "['comer']"), convertirlo en una lista
-        if dato.startswith("[") and dato.endswith("]"):
-            dato = dato[1:-1].replace("'", "").strip()
-            return [d.strip() for d in dato.split(",")]  # Devolver una lista de alelos
-        else:
-            return [dato]  # Retornar como lista de un solo elemento
-    
-
-    return linea[inicio:final]
 
 run()
