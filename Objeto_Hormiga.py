@@ -1,5 +1,6 @@
 import random
 import time
+from Objeto_veneno import Veneno
 
 Alelos = {"arriba":  [0,-1], 
           "abajo":  [0,1],
@@ -9,7 +10,7 @@ Alelos = {"arriba":  [0,-1],
 
 
 alelos_keys = list(Alelos.keys()) #para llamar a los alelos
-alelos_keys_sin_comer = ["arriba", "abajo", "derecha", "izquierda"]
+
 
 
 #For debbug:
@@ -72,6 +73,7 @@ exit = encontrar_pos(laberinto, "e")
 adn_i_1 = [random.choice(alelos_keys)]
 adn_i_2 = [random.choice(alelos_keys)]
 
+veneno = Veneno()
 
 class Hormiga:
     def __init__(self, posicion, salud, alcohol_lvl, puntos, adn):
@@ -133,8 +135,9 @@ class Hormiga:
         casilla = laberinto[self.posicion[1]][self.posicion[0]]
 
         if casilla == "p":
-            #interactua con poison
-            pass
+
+            self.salud += veneno.consumir()
+
         elif casilla == "s":
             #interactua con sugar
             pass
@@ -234,45 +237,47 @@ def encuentre_datos(linea, etiqueta):
 
     return linea[inicio:final]  #si no es ADN, retorna string, pues lo que se escribe es str            
 
-def run():
-    global Poblacion
+def algoritmo_genetico(): #corre el algoritmo genetico
 
-    with open("puntajes-hormiga.txt", "w") as text: #borra todo para comenzar
-        pass
+    global Poblacion    
+        
+    for hormiga in Poblacion:
+        
+        adn = hormiga.get_info()[4]
+        
 
-    gen = 1
-    
-    while True:
-        
-        lista_adn_temp =[]
-        
-        for hormiga in Poblacion:
+        for alelo in adn:
+
             
-            adn = hormiga.get_info()[4]
+            if alelo != "comer":
+                
+                pre_fitness = hormiga.fitness()
 
-            for alelo in adn:
-                if alelo != "comer":
-                    
-                    pre_fitness = hormiga.fitness()
+                hormiga.mover(alelo) #cambia los atributos del objeto
 
-                    hormiga.mover(alelo) #cambia los atributos del objeto
+                post_fitness = hormiga.fitness()
 
-                    post_fitness = hormiga.fitness()
-
-                    if post_fitness < pre_fitness:
-                        print("La hormiga hizo un movimiento óptimo (+20 pts)")
-                        hormiga.add_pts(20)
-                    else:
-                        print("La hormiga hizo un movimiento NO óptimo (-30 pts)")
-                        hormiga.add_pts(-30)
+                if post_fitness <= pre_fitness:
+                    print("La hormiga hizo un movimiento óptimo (+20 pts)")
+                    hormiga.add_pts(20)
                 else:
+                    print("La hormiga hizo un movimiento NO óptimo (-30 pts)")
+                    hormiga.add_pts(-30)
+            else:
 
-                    hormiga.comer()
+                hormiga.comer()
 
+                salud = hormiga.get_info()[1]
+
+                if salud <= 0:
+                    print("La hormiga ha muerto :(")
+                    break
+
+       
                     
-                        
-                       
-            
+        salud = hormiga.get_info()[1] 
+
+        if salud > 0:
             fitness = hormiga.fitness()
 
             
@@ -287,6 +292,11 @@ def run():
                 
             print("Hormiga resultados:", hormiga.get_info())
 
+        else:
+
+            Poblacion.remove(hormiga)
+
+    if Poblacion:
         for hormiga in Poblacion: #para meterlas despues de modificarlas (evalua su puntaje)
 
             with open("puntajes-hormiga.txt", "r") as text:
@@ -298,7 +308,7 @@ def run():
                     
                         
                     lines.append(f"HORMIGA:1_SALUD:{hormiga.get_info()[1]}_ALCOHOL:{hormiga.get_info()[2]}_PUNTOS:{hormiga.get_info()[3]}_ADN:{hormiga.get_info()[4]}_" + "\n")
-                        
+                    
                 
                 elif len(lines) == 1:
                     puntos = int(encuentre_datos(lines[0], "PUNTOS:"))
@@ -343,7 +353,7 @@ def run():
                         lines[0] = lines[0].replace(f"{linea1.split('HORMIGA:1_')[1]}", f"SALUD:{hormiga.get_info()[1]}_ALCOHOL:{hormiga.get_info()[2]}_PUNTOS:{hormiga.get_info()[3]}_ADN:{hormiga.get_info()[4]}_" + "\n")
                         lines[1] = lines[1].replace(f"{linea2.split('HORMIGA:2_')[1]}", f"SALUD:{encuentre_datos(linea1, "SALUD:")}_ALCOHOL:{encuentre_datos(linea1, "ALCOHOL:")}_PUNTOS:{encuentre_datos(linea1, "PUNTOS:")}_ADN:{encuentre_datos(linea1, "ADN:")}_" + "\n")
                         lines[2] = lines[2].replace(f"{linea3.split('HORMIGA:3_')[1]}", 
-                                         f"SALUD:{encuentre_datos(linea2, "SALUD:")}_ALCOHOL:{encuentre_datos(linea2, "ALCOHOL:")}_PUNTOS:{encuentre_datos(linea2, "PUNTOS:")}_ADN:{encuentre_datos(linea2, "ADN:")}_" + "\n")
+                                            f"SALUD:{encuentre_datos(linea2, "SALUD:")}_ALCOHOL:{encuentre_datos(linea2, "ALCOHOL:")}_PUNTOS:{encuentre_datos(linea2, "PUNTOS:")}_ADN:{encuentre_datos(linea2, "ADN:")}_" + "\n")
                     elif puntos_hormiga > puntos_linea_2:
                         linea2 = lines[1]
                         linea3 = lines[2]
@@ -351,27 +361,40 @@ def run():
                     
                         lines[1] = lines[1].replace(f"{linea2.split('HORMIGA:2_')[1]}", f"SALUD:{hormiga.get_info()[1]}_ALCOHOL:{hormiga.get_info()[2]}_PUNTOS:{hormiga.get_info()[3]}_ADN:{hormiga.get_info()[4]}_" + "\n")
                         lines[2] = lines[2].replace(f"{linea3.split('HORMIGA:3_')[1]}", 
-                                         f"SALUD:{encuentre_datos(linea2, "SALUD:")}_ALCOHOL:{encuentre_datos(linea2, "ALCOHOL:")}_PUNTOS:{encuentre_datos(linea2, "PUNTOS:")}_ADN:{encuentre_datos(linea2, "ADN:")}_" + "\n")
+                                            f"SALUD:{encuentre_datos(linea2, "SALUD:")}_ALCOHOL:{encuentre_datos(linea2, "ALCOHOL:")}_PUNTOS:{encuentre_datos(linea2, "PUNTOS:")}_ADN:{encuentre_datos(linea2, "ADN:")}_" + "\n")
                     elif puntos_hormiga > puntos_linea_3:
                         linea3 = lines[2]
                         lines[2] = lines[2].replace(f"{linea3.split('HORMIGA:3_')[1]}", 
-                                         f"SALUD:{hormiga.get_info()[1]}_ALCOHOL:{hormiga.get_info()[2]}_PUNTOS:{hormiga.get_info()[3]}_ADN:{hormiga.get_info()[4]}_" + "\n")     
+                                            f"SALUD:{hormiga.get_info()[1]}_ALCOHOL:{hormiga.get_info()[2]}_PUNTOS:{hormiga.get_info()[3]}_ADN:{hormiga.get_info()[4]}_" + "\n")     
 
                     else:
                         print("la hormiga no entra en el top 3")
 
-            with open("puntajes-hormiga.txt", "w") as text: 
-                text.writelines(lines)  
+        with open("puntajes-hormiga.txt", "w") as text: 
+            text.writelines(lines)  
 
-        #ya metidas en el txt(ya evaluadas), procedo a cruzar las mejores dos
 
-        with open("puntajes-hormiga.txt", "r") as text:
-            lines = text.readlines()
+def se_cruzan ():
 
-            adnh1 = encuentre_datos(lines[0], "ADN:")
-            adnh2 = encuentre_datos(lines[1], "ADN:")
+    global Poblacion
 
-                    
+    with open("puntajes-hormiga.txt", "r") as text:
+        lines = text.readlines()
+        #Selección
+    if not lines:
+        print("no hay hormigas, vamos a meter dos más")
+        Poblacion = [Hormiga(start, 100, 0, 0, [random.choice(alelos_keys)]), Hormiga(start, 100, 0, 0, [random.choice(alelos_keys)])]
+
+    elif len(lines) == 1:
+        print("solo queda una hormiga, vamos a meter una más")
+        Poblacion = [Hormiga(start, 100, 0, 0, [random.choice(alelos_keys)])]
+    
+    else:
+        
+        adnh1 = encuentre_datos(lines[0], "ADN:")
+        adnh2 = encuentre_datos(lines[1], "ADN:")
+
+        #cruzamiento            
         hormiga_hija = cruce(adnh1, adnh2)
 
         hormiga_hija.muta()
@@ -379,20 +402,43 @@ def run():
         print("Hormiga Hija:", hormiga_hija.get_info())
 
         Poblacion = [hormiga_hija] #esta lista se modifica para que tenga sentido en el código, pues evalua las hormigas in Poblacion
-        
+
+def intento():
+
+    global Poblacion
+
+    with open("puntajes-hormiga.txt", "w") as text: #borra todo para comenzar
+        pass
+
+    gen = 1
+
+    while True:
+
+
         gen+=1
+        if Poblacion:
+
+            algoritmo_genetico()
+            se_cruzan()
+        else:
+
+            print("no hay hormigas, vamos a meter dos más")
+            Poblacion = [Hormiga(start, 100, 0, 0, [random.choice(alelos_keys)]), Hormiga(start, 100, 0, 0, [random.choice(alelos_keys)])]
+
 
         with open("puntajes-hormiga.txt", "r") as text:
             lines = text.readlines()
-            if int(encuentre_datos(lines[0], "PUNTOS:")) >= 180:
-                break
+            if lines:
+                if int(encuentre_datos(lines[0], "PUNTOS:")) >= 180:
+                    break
         #option = input("<s> para salir, <any oter key> para la siguiente simulación")
         #esto for debbug, pero ya después lo quitamos
         #if option == "s":
             #break
+
     print(f"Numero de generaciones: {gen}")
-        
 
 
+    
 
-run()
+intento()
