@@ -1,5 +1,8 @@
 import random
 from Objeto_veneno import Veneno
+from Objeto_azucar import Azucar
+from Objeto_Vino import Vino
+import Objeto_Laberinto as lb
 
 Alelos = {"arriba":  [0,-1], 
           "abajo":  [0,1],
@@ -11,6 +14,8 @@ Alelos = {"arriba":  [0,-1],
 alelos_keys = list(Alelos.keys()) #para llamar a los alelos
 
 veneno = Veneno()
+azucar = Azucar(30)
+vino = Vino(10)
 
 class Hormiga:
     def __init__(self, posicion, salud, alcohol_lvl, puntos, adn, laberinto):
@@ -76,13 +81,16 @@ class Hormiga:
         if casilla == "VN":
 
             self.salud += veneno.consumir()
+            print("La hormiga ha consumido veneno (muere)")
 
         elif casilla == "A":
-            #interactua con sugar
-            pass
+            self.puntos += azucar.consumir()
+            print(f"La hormiga ha consumido azucar ({azucar.consumir()}pts)")
+
         elif casilla == "V":
-            #interactua con vino
-            pass
+            self.alcohol_lvl += vino.consumir()
+            self.salud -= 10
+            print(f"La hormiga ha consumido vino (-10 de salud)(+)")
         else:
             print("La hormiga intentó comer donde no había comida (-30 pts)")
             self.puntos -= 30
@@ -97,6 +105,7 @@ class Hormiga:
         if casilla == "V":
             #alcohol le quita 10 puntos de salud
             pass
+
     def fitness(self):
         return abs(exit[0]-self.posicion[0]) + abs(exit[1] - self.posicion[1])
 
