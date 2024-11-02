@@ -30,6 +30,7 @@ class Hormiga:
     def add_pts(self, puntos):
 
         self.puntos += puntos
+
     def change_adn(self, pos, valor):
 
         print(f"Sin cambio {self.adn}")
@@ -44,17 +45,17 @@ class Hormiga:
         if (0 <= Alelos[alelo][0] + self.posicion[0] < len(self.laberinto[0]) and 0 <= Alelos[alelo][1] + self.posicion[1] < len(self.laberinto) 
                 ):
 
-            if  self.laberinto[Alelos[alelo][1] + self.posicion[1]][Alelos[alelo][0] + self.posicion[0]] != "r":
+            if  self.laberinto[Alelos[alelo][1] + self.posicion[1]][Alelos[alelo][0] + self.posicion[0]] != "R":
 
                 
-                if self.laberinto[self.posicion[1]][self.posicion[0]] == "p": 
+                if self.laberinto[self.posicion[1]][self.posicion[0]] == "VN": 
                     print("La hormiga a ignorado al veneno")
                 
-                if self.laberinto[self.posicion[1]][self.posicion[0]] == "g": 
+                if self.laberinto[self.posicion[1]][self.posicion[0]] == "A": 
                     print("La hormiga a ignorado al azucar")
 
-                if self.laberinto[self.posicion[1]][self.posicion[0]] == "a": 
-                    print("La hormiga a ignorado al alcohol")
+                if self.laberinto[self.posicion[1]][self.posicion[0]] == "V": 
+                    print("La hormiga a ignorado al vino")
                 #para decir que no comió y avanzó
 
                 self.posicion[1] = self.posicion[1] + Alelos[alelo][1]
@@ -72,15 +73,15 @@ class Hormiga:
         
         casilla = self.laberinto[self.posicion[1]][self.posicion[0]]
 
-        if casilla == "p":
+        if casilla == "VN":
 
             self.salud += veneno.consumir()
 
-        elif casilla == "s":
+        elif casilla == "A":
             #interactua con sugar
             pass
-        elif casilla == "a":
-            #interactua con alcohol
+        elif casilla == "V":
+            #interactua con vino
             pass
         else:
             print("La hormiga intentó comer donde no había comida (-30 pts)")
@@ -90,10 +91,10 @@ class Hormiga:
     def modifica_salud(self):
         casilla = self.laberinto[self.posicion[1]][self.posicion[0]]
 
-        if casilla == "p":
+        if casilla == "VN":
             #poison la mata
             pass
-        if casilla == "a":
+        if casilla == "V":
             #alcohol le quita 10 puntos de salud
             pass
     def fitness(self):
